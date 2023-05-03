@@ -44,8 +44,11 @@ class MBankParser(CsvStatementParser):
 
         # Normalize string
         for i, v in enumerate(line):
+            # Replace colon with space - causes string formatting problems
             line[i] = v.replace(":"," ")
+            # Remove leading and trailing spaces 
             line[i] = v.strip()
+            # Replace multiple spaces with just one
             line[i] = " ".join(v.split())
 
         if line[columns["#Částka transakce"]] == "":
@@ -61,7 +64,7 @@ class MBankParser(CsvStatementParser):
 
         statement_line.id = statement.generate_transaction_id(statement_line)
 
-        # If payye is empty or transactions is percentual savings set payee to -
+        # If payee is empty or transactions is percentual saving set payee to -
         if line[columns["#Plátce/Příjemce"]] =="" or line[columns["#Plátce/Příjemce"]
         ].startswith("PLATBA KARTOU Z ČÁSTKY") or line[columns["#Plátce/Příjemce"]
         ].startswith("VÝBĚR Z BANKOMATU Z ČÁSTKY"):
