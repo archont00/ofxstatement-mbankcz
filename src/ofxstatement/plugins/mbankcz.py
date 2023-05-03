@@ -44,7 +44,7 @@ class MBankParser(CsvStatementParser):
 
         # Normalize string
         for i, v in enumerate(line):
-            line[i] = line.replace(":"," ")
+            line[i] = v.replace(":"," ")
             line[i] = v.strip()
             " ".join(v.split())
 
