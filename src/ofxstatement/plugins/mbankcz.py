@@ -82,7 +82,7 @@ class MBankParser(CsvStatementParser):
             statement_line.trntype = "XFER"
         elif payment_type.startswith("PŘEVOD NA"):
             statement_line.trntype = "XFER"
-        elif payment_type.startswith("VVÝBĚR Z BANKOMATU"):
+        elif payment_type.startswith("VÝBĚR Z BANKOMATU"):
             statement_line.trntype = "ATM"
         elif payment_type.startswith("PLATBA KARTOU"):
             statement_line.trntype = "POS"
@@ -99,10 +99,10 @@ class MBankParser(CsvStatementParser):
             statement_line.trntype = "OTHER"
 
         # statement_line.memo = "Popis pohybu" + the payment identifiers
-        if line[columns["#Popis transakce"]] != "":
+        if line[columns["#Zpráva pro příjemce"]] != "":
             # if Popis pohybu is present, it means that place is not relevant
             # because card payments do not have this property
-            statement_line.memo = line[columns["#Popis transakce"]]
+            statement_line.memo = line[columns["#Zpráva pro příjemce"]]
         if not self.empty_or_null(line[columns["#VS"]]):
             statement_line.memo += "|VS: " + line[columns["#VS"]]
 
