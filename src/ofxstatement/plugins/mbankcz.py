@@ -8,7 +8,7 @@ from ofxstatement.plugin import Plugin
 from ofxstatement.parser import CsvStatementParser
 
 
-class EquaBankParser(CsvStatementParser):
+class MBankParser(CsvStatementParser):
     date_format = "%d.%m.%Y"
 
     def __init__(self, *args, **kwargs) -> None:
@@ -30,12 +30,12 @@ class EquaBankParser(CsvStatementParser):
             # Prepare columns headers lookup table for parsing
             self.columns = {v: i for i, v in enumerate(line)}
             self.mappings = {
-                "date": self.columns["Datum vystavení"],
-                "memo": self.columns["Místo transakce"],
-                "payee": self.columns["Název účtu protistrany"],
-                "amount": self.columns["Částka"],
-                "check_no": self.columns["Variabilní symbol"],
-                "refnum": self.columns["Kód transakce"],
+                "date": self.columns["#Datum uskutečnění transakce"],
+                "memo": self.columns["#Zpráva pro příjemce"],
+                "payee": self.columns["#Plátce/Příjemce"],
+                "amount": self.columns["#Částka transakce"],
+                "check_no": self.columns["#VS"],
+                #"refnum": self.columns["Kód transakce"],
             }
             # And skip further processing by parser
             return None
@@ -54,8 +54,8 @@ class EquaBankParser(CsvStatementParser):
 
         # Ignore lines, which do not have posting date yet (typically pmts by debit cards
         # have some delays).
-        if line[columns["Datum vystavení"]]:
-            statement_line.date_user = line[columns["Datum vystavení"]]
+        if line[columns["#Datum uskutečnění transakce"]]:
+            statement_line.date_user = line[columns["#Datum uskutečnění transakce"]]
             statement_line.date_user = datetime.strptime(
                 statement_line.date_user, self.date_format
             )
@@ -63,38 +63,40 @@ class EquaBankParser(CsvStatementParser):
         statement_line.id = statement.generate_transaction_id(statement_line)
 
         # Manually set some of the known transaction types
-        payment_type = line[columns["Typ pohybu"]]
-        if payment_type.startswith("Srážková daň z úroků"):
+        payment_type = line[columns["#Popis transakce"]]
+        if payment_type.startswith("ZÚČTOVÁNÍ ÚROKŮ"):
             statement_line.trntype = "DEBIT"
-        elif payment_type.startswith("Připsaný úrok"):
+        elif payment_type.startswith("PŘIPSÁNÍ ÚROKŮ"):
             statement_line.trntype = "INT"
-        elif payment_type.startswith("Poplatky"):
+        elif payment_type.startswith("POPLATEK"):
             statement_line.trntype = "FEE"
-        elif payment_type.startswith("Okamžitá domácí platba"):
+        elif payment_type.startswith("ODCHOZÍ"):
             statement_line.trntype = "XFER"
-        elif payment_type.startswith("Příchozí"):
+        elif payment_type.startswith("PŘÍCHOZÍ"):
             statement_line.trntype = "XFER"
-        elif payment_type.startswith("Vrácení platby"):
+        elif payment_type.startswith("POS VRÁCENÍ ZBOŽÍ"):
             statement_line.trntype = "XFER"
-        elif payment_type.startswith("Odchozí"):
+        elif payment_type.startswith("PŘEDDEF. ODCHOZÍ"):
             statement_line.trntype = "XFER"
-        elif payment_type.startswith("Platba v rámci"):
+        elif payment_type.startswith("VLASTNÍ PŘEVOD"): 
             statement_line.trntype = "XFER"
-        elif payment_type.startswith("Výběr hotovosti"):
+        elif payment_type.startswith("PŘEVOD NA"):
+            statement_line.trntype = "XFER"
+        elif payment_type.startswith("VVÝBĚR Z BANKOMATU"):
             statement_line.trntype = "ATM"
-        elif payment_type.startswith("Platba kartou"):
+        elif payment_type.startswith("PLATBA KARTOU"):
             statement_line.trntype = "POS"
-        elif payment_type.startswith("Inkaso"):
+        elif payment_type.startswith("INKASO"):
             statement_line.trntype = "DIRECTDEBIT"
-        elif payment_type.startswith("Trvalý"):
-            statement_line.trntype = "REPEATPMT"
+        # elif payment_type.startswith("Trvalý"):
+        #    statement_line.trntype = "REPEATPMT"
         else:
             print(
-                'WARN: Unexpected type of payment appeared - "{}". Using XFER transaction type instead'.format(
+                'WARN: Unexpected type of payment appeared - "{}". Using OTHER transaction type instead'.format(
                     payment_type
                 )
             )
-            statement_line.trntype = "XFER"
+            statement_line.trntype = "OTHER"
 
         # .payee becomes OFX.NAME which becomes "Description" in GnuCash
         # .memo  becomes OFX.MEMO which becomes "Notes"       in GnuCash
@@ -106,22 +108,22 @@ class EquaBankParser(CsvStatementParser):
         ].startswith("SUSPENSE"):
             statement_line.payee = ""
         # statement_line.payee = "Název účtu protistrany" + "Číslo účtu protistrany"
-        elif line[columns["Číslo účtu protistrany"]] != "":
-            statement_line.payee += "|ÚČ: " + line[columns["Číslo účtu protistrany"]]
+        elif line[columns["#Číslo účtu plátce/příjemce"]] != "":
+            statement_line.payee += "|ÚČ: " + line[columns["#Číslo účtu plátce/příjemce"]]
 
         # statement_line.memo = "Popis pohybu" + the payment identifiers
-        if line[columns["Popis pohybu"]] != "":
+        if line[columns["#Popis transakce"]] != "":
             # if Popis pohybu is present, it means that place is not relevant
             # because card payments do not have this property
-            statement_line.memo = line[columns["Popis pohybu"]]
-        if not self.empty_or_null(line[columns["Variabilní symbol"]]):
-            statement_line.memo += "|VS: " + line[columns["Variabilní symbol"]]
+            statement_line.memo = line[columns["#Popis transakce"]]
+        if not self.empty_or_null(line[columns["#VS"]]):
+            statement_line.memo += "|VS: " + line[columns["#VS"]]
 
-        if not self.empty_or_null(line[columns["Konstantní symbol"]]):
-            statement_line.memo += "|KS: " + line[columns["Konstantní symbol"]]
+        if not self.empty_or_null(line[columns["#KS"]]):
+            statement_line.memo += "|KS: " + line[columns["#KS"]]
 
-        if not self.empty_or_null(line[columns["Specifický symbol"]]):
-            statement_line.memo += "|SS: " + line[columns["Specifický symbol"]]
+        if not self.empty_or_null(line[columns["#SS"]]):
+            statement_line.memo += "|SS: " + line[columns["#SS"]]
 
         # throw out memo if it would be the same as payee
         if statement_line.payee == "" and statement_line.memo:
@@ -138,15 +140,15 @@ class EquaBankParser(CsvStatementParser):
         return value in ["", "0"]
 
 
-class EquaBankCZPlugin(Plugin):
-    """Equa Bank a.s. (Czech Republic) (CSV, UTF-8)"""
+class MBankCZPlugin(Plugin):
+    """mBank S.A. (Czech Republic) (CSV, cp1250)"""
 
-    def get_parser(self, filename: str) -> EquaBankParser:
-        EquaBankCZPlugin.encoding = self.settings.get("charset", "utf-8")
-        file = open(filename, "r", encoding=EquaBankCZPlugin.encoding)
-        parser = EquaBankParser(file)
+    def get_parser(self, filename: str) -> MBankParser:
+        MBankCZPlugin.encoding = self.settings.get("charset", "cp1250")
+        file = open(filename, "r", encoding=MPBankCZPlugin.encoding)
+        parser = MBankParser(file)
         parser.statement.currency = self.settings.get("currency", "CZK")
-        parser.statement.bank_id = self.settings.get("bank", "EQBKCZPP")
+        parser.statement.bank_id = self.settings.get("bank", "BREXCZPP")
         parser.statement.account_id = self.settings.get("account", "")
         parser.statement.account_type = self.settings.get("account_type", "CHECKING")
         parser.statement.trntype = "OTHER"

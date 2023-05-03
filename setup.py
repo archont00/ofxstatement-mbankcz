@@ -11,12 +11,12 @@ with open("README.md") as f:
     long_description = f.read()
 
 setup(
-    name="ofxstatement-equabankcz",
+    name="ofxstatement-mbankcz",
     version=version,
-    author="Jan Koscielniak",
-    author_email="jkosci@gmail.com",
-    url="https://github.com/kosciCZ/ofxstatement-equabankcz",
-    description=("ofxstatement plugin for Equa Bank (CZ)"),
+    author="Milan Horák",
+    author_email="milan@nosoftware.cz",
+    url="https://github.com/SinyaWeo/ofxstatement-mbankcz",
+    description=("ofxstatement plugin for mBank (CZ)"),
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="GPLv3",
@@ -36,7 +36,7 @@ setup(
     namespace_packages=["ofxstatement", "ofxstatement.plugins"],
     entry_points={
         "ofxstatement": [
-            "equabankcz = ofxstatement.plugins.equabankcz:EquaBankCZPlugin"
+            "mbankcz = ofxstatement.plugins.mbankcz:MBankCZPlugin"
         ]
     },
     install_requires=["ofxstatement"],

@@ -1,14 +1,14 @@
-# ofxstatement-equabankcz
-This is a parser for CSV transaction history exported from Equa Bank a.s. (Czech Republic) from within the report in Account History (CSV).
+# ofxstatement-mbankcz
+This is a parser for CSV transaction history exported from mBank a.s. (Czech Republic) from within the report in Account History (CSV).
 
-The expected field separator is semicolon (";") and character encoding UTF-8.
+The expected field separator is semicolon (";") and character encoding Win-1250.
 
-It is a plugin for [ofxstatement](https://github.com/kedder/ofxstatement).
+It is a plugin for [ofxstatement](https://github.com/SinyaWeo/ofxstatement-mbankcz).
 I've based this on  the [ofxstatement-airbankcz](https://github.com/milankni/ofxstatement-airbankcz) plugin.
 
 ## Usage
 ```shell
-$ ofxstatement convert -t equabankcz movements.csv equa.ofx
+$ ofxstatement convert -t mbankcz movements.csv mbank.ofx
 ```
 ## Configuration
 ```shell
@@ -16,10 +16,10 @@ $ ofxstatement edit-config
 ```
 And enter e.g. this:
 ```
-[equabankcz]
-plugin = equabankcz
+[mbankcz]
+plugin = mbankcz
 currency = CZK
-account = Equa Bank CZK
+account = mBank CZK
 ```
 
 ## Issues
