@@ -47,8 +47,8 @@ class MBankParser(CsvStatementParser):
         for i, v in enumerate(line):
             line[i] = v.strip()
 
-        if line[columns["#Částka"]] == "":
-            line[columns["#Částka"]] = "0"
+        if line[columns["#Částka transakce"]] == "":
+            line[columns["#Částka transakce"]] = "0"
 
         statement_line = super().parse_record(line)
 
