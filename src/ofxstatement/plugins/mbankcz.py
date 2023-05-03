@@ -145,7 +145,7 @@ class MBankCZPlugin(Plugin):
 
     def get_parser(self, filename: str) -> MBankParser:
         MBankCZPlugin.encoding = self.settings.get("charset", "cp1250")
-        file = open(filename, "r", encoding=MPBankCZPlugin.encoding)
+        file = open(filename, "r", encoding=MBankCZPlugin.encoding)
         parser = MBankParser(file)
         parser.statement.currency = self.settings.get("currency", "CZK")
         parser.statement.bank_id = self.settings.get("bank", "BREXCZPP")
