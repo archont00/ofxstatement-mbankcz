@@ -35,7 +35,6 @@ class MBankParser(CsvStatementParser):
                 "payee": self.columns["#Plátce/Příjemce"],
                 "amount": self.columns["#Částka transakce"],
                 "check_no": self.columns["#VS"],
-                #"refnum": self.columns["Kód transakce"],
             }
             # And skip further processing by parser
             return None
@@ -45,15 +44,15 @@ class MBankParser(CsvStatementParser):
 
         # Normalize string
         for i, v in enumerate(line):
+            line[i] = line.replace(":"," ")
             line[i] = v.strip()
+            " ".join(v.split())
 
         if line[columns["#Částka transakce"]] == "":
             line[columns["#Částka transakce"]] = "0"
 
         statement_line = super().parse_record(line)
 
-        # Ignore lines, which do not have posting date yet (typically pmts by debit cards
-        # have some delays).
         if line[columns["#Datum uskutečnění transakce"]]:
             statement_line.date_user = line[columns["#Datum uskutečnění transakce"]]
             statement_line.date_user = datetime.strptime(
@@ -88,8 +87,6 @@ class MBankParser(CsvStatementParser):
             statement_line.trntype = "POS"
         elif payment_type.startswith("INKASO"):
             statement_line.trntype = "DIRECTDEBIT"
-        # elif payment_type.startswith("Trvalý"):
-        #    statement_line.trntype = "REPEATPMT"
         else:
             print(
                 'WARN: Unexpected type of payment appeared - "{}". Using OTHER transaction type instead'.format(
@@ -98,11 +95,9 @@ class MBankParser(CsvStatementParser):
             )
             statement_line.trntype = "OTHER"
 
-        # statement_line.memo = "Popis pohybu" + the payment identifiers
         if line[columns["#Zpráva pro příjemce"]] != "":
-            # if Popis pohybu is present, it means that place is not relevant
-            # because card payments do not have this property
             statement_line.memo = line[columns["#Zpráva pro příjemce"]]
+
         if not self.empty_or_null(line[columns["#VS"]]):
             statement_line.memo += "|VS: " + line[columns["#VS"]]
 
@@ -111,11 +106,6 @@ class MBankParser(CsvStatementParser):
 
         if not self.empty_or_null(line[columns["#SS"]]):
             statement_line.memo += "|SS: " + line[columns["#SS"]]
-
-        # throw out memo if it would be the same as payee
-        if statement_line.payee == "" and statement_line.memo:
-            statement_line.payee = statement_line.memo
-            statement_line.memo = ""
 
         if statement_line.amount == 0:
             return None

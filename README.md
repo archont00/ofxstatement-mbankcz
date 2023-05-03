@@ -1,14 +1,14 @@
 # ofxstatement-mbankcz
-This is a parser for CSV transaction history exported from mBank a.s. (Czech Republic) from within the report in Account History (CSV).
+This is a parser for CSV transaction history exported from mBank S.A. (Czech Republic) from within the report in Account History (CSV).
 
 The expected field separator is semicolon (";") and character encoding Win-1250.
 
 It is a plugin for [ofxstatement](https://github.com/SinyaWeo/ofxstatement-mbankcz).
-I've based this on  the [ofxstatement-airbankcz](https://github.com/milankni/ofxstatement-airbankcz) plugin.
+I've based this on  the [ofxstatement-equabankcz](https://github.com/kosciCZ/ofxstatement-equabankcz) plugin.
 
 ## Usage
 ```shell
-$ ofxstatement convert -t mbankcz movements.csv mbank.ofx
+$ ofxstatement convert -t mbank.cz movements.csv mbank.ofx
 ```
 ## Configuration
 ```shell
@@ -19,7 +19,7 @@ And enter e.g. this:
 [mbankcz]
 plugin = mbankcz
 currency = CZK
-account = mBank CZK
+account = mKonto
 ```
 
 ## Issues
