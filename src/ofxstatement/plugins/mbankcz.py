@@ -61,6 +61,13 @@ class MBankParser(CsvStatementParser):
 
         statement_line.id = statement.generate_transaction_id(statement_line)
 
+            # throw out generic card payment names and associated account numbers
+        if line[columns["#Plátce/Příjemce"]] =="":
+            statement_line.payee = "-"
+        # statement_line.payee = "Název účtu protistrany" + "Číslo účtu protistrany"
+        elif line[columns["Číslo účtu plátce/příjemce"]] != "":
+            statement_line.payee += "|ÚČ: " + line[columns["Číslo účtu plátce/příjemce"]]
+
         # Manually set some of the known transaction types
         payment_type = line[columns["#Popis transakce"]]
         if payment_type.startswith("ZÚČTOVÁNÍ ÚROKŮ"):
