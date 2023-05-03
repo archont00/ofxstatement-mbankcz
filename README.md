@@ -9,7 +9,7 @@ I've based this on  the [ofxstatement-equabankcz](https://github.com/kosciCZ/ofx
 ## Usage
 :exclamation: Remove any non-data lines from CSV file so only column headers and data lines are present.
 ```shell
-$ ofxstatement convert -t mbank.cz movements.csv mbank.ofx
+$ ofxstatement convert -t mbankcz movements.csv mbank.ofx
 ```
 ## Configuration
 ```shell
