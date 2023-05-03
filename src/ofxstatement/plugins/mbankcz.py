@@ -9,7 +9,7 @@ from ofxstatement.parser import CsvStatementParser
 
 
 class MBankParser(CsvStatementParser):
-    date_format = "%d.%m.%Y"
+    date_format = "%d-%m-%Y"
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, *kwargs)
