@@ -61,8 +61,10 @@ class MBankParser(CsvStatementParser):
 
         statement_line.id = statement.generate_transaction_id(statement_line)
 
+        # If payye is empty or transactions is percentual savings set payee to -
         if line[columns["#Plátce/Příjemce"]] =="" or line[columns["#Plátce/Příjemce"]
-        ].startswith("PLATBA KARTOU Z ČÁSTKY"):
+        ].startswith("PLATBA KARTOU Z ČÁSTKY") or line[columns["#Plátce/Příjemce"]
+        ].startswith("VÝBĚR Z BANKOMATU Z ČÁSTKY"):
             statement_line.payee = "-"
         elif line[columns["#Číslo účtu plátce/příjemce"]] != "":
             statement_line.payee += "|ÚČ: " + line[columns["#Číslo účtu plátce/příjemce"]]
