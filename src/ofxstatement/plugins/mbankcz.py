@@ -98,19 +98,6 @@ class MBankParser(CsvStatementParser):
             )
             statement_line.trntype = "OTHER"
 
-        # .payee becomes OFX.NAME which becomes "Description" in GnuCash
-        # .memo  becomes OFX.MEMO which becomes "Notes"       in GnuCash
-        # When .payee is empty, GnuCash imports .memo to "Description" and keeps "Notes" empty
-
-        # throw out generic card payment names and associated account numbers
-        if line[columns["Název účtu protistrany"]].startswith("NOSTRO") or line[
-            columns["Název účtu protistrany"]
-        ].startswith("SUSPENSE"):
-            statement_line.payee = ""
-        # statement_line.payee = "Název účtu protistrany" + "Číslo účtu protistrany"
-        elif line[columns["#Číslo účtu plátce/příjemce"]] != "":
-            statement_line.payee += "|ÚČ: " + line[columns["#Číslo účtu plátce/příjemce"]]
-
         # statement_line.memo = "Popis pohybu" + the payment identifiers
         if line[columns["#Popis transakce"]] != "":
             # if Popis pohybu is present, it means that place is not relevant
