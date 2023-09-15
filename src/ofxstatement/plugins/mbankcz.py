@@ -1,4 +1,5 @@
 import csv
+import re
 from datetime import datetime
 from typing import Iterable, Optional, List
 from decimal import Decimal
@@ -99,6 +100,14 @@ class MBankParser(CsvStatementParser):
             statement_line.date_user = datetime.strptime(
                 statement_line.date_user, self.date_format
             )
+
+        date_user_match = re.match(
+            "^(.*) DATUM PROVEDENÍ TRANSAKCE: (\\d{4}-\\d{2}-\\d{2})$",
+            line[columns["#Zpráva pro příjemce"]])
+        if date_user_match:
+            line[columns["#Zpráva pro příjemce"]] = date_user_match.group(1)
+            statement_line.date_user = datetime.strptime(
+                date_user_match.group(2), "%Y-%m-%d")
 
         statement_line.id = statement.generate_transaction_id(statement_line)
 
