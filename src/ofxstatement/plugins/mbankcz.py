@@ -1,6 +1,7 @@
 import csv
 from datetime import datetime
 from typing import Iterable, Optional, List
+from decimal import Decimal
 
 from ofxstatement import statement
 from ofxstatement.statement import StatementLine
@@ -18,9 +19,46 @@ class MBankParser(CsvStatementParser):
 
     def split_records(self) -> Iterable[str]:
         """
-        Return iterable object consisting of a line per transaction
+        Parse metadata scattered around the actual transaction lines and return
+        those for further processing.
         """
-        return csv.reader(self.fin, delimiter=";", quotechar='"')
+        reading_records = False
+        last_meta_header = None
+        records = []
+        for line in csv.reader(self.fin, delimiter=";", quotechar='"'):
+            if len(line) == 0:
+                pass
+            elif len(line) == 9 and line[6] == "#Konečný zůstatek:":
+                self.statement.end_balance = \
+                    Decimal(line[7]
+                            .replace(self.statement.currency, "")
+                            .replace(" ", "")
+                            .replace(",", "."))
+                reading_records = False
+            elif reading_records:
+                records.append(line)
+            elif last_meta_header is not None:
+                if last_meta_header == "#Měna účtu:":
+                    self.statement.currency = line[0]
+                elif last_meta_header == "#Číslo účtu:":
+                    self.statement.bank_id = line[0].split("/")[1]
+                    self.statement.account_id = line[0].split("/")[0]
+                elif last_meta_header == "#Za období":
+                    self.statement.start_date = datetime.strptime(
+                        line[0], '%d.%m.%Y')
+                    self.statement.end_date = datetime.strptime(
+                        line[1], '%d.%m.%Y')
+                last_meta_header = None
+            elif len(line) == 2:
+                last_meta_header = line[0]
+            elif len(line) == 9 and line[6] == "#Počáteční zůstatek:":
+                self.statement.start_balance = \
+                    Decimal(line[7]
+                            .replace(self.statement.currency, "")
+                            .replace(" ", "")
+                            .replace(",", "."))
+                reading_records = True
+        return records
 
     def parse_record(self, line: List[str]) -> Optional[StatementLine]:
         """Parse given transaction line and return StatementLine object"""
