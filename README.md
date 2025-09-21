@@ -4,10 +4,18 @@ This is a parser for CSV transaction history exported from mBank S.A. (Czech Rep
 The expected field separator is semicolon (";") and character encoding Win-1250.
 
 It is a plugin for [ofxstatement](https://github.com/SinyaWeo/ofxstatement-mbankcz).
-I've based this on  the [ofxstatement-equabankcz](https://github.com/kosciCZ/ofxstatement-equabankcz) plugin.
+
+It is based on:
+- [ofxstatement-equabankcz](https://github.com/kosciCZ/ofxstatement-equabankcz).
+- [ofxstatement-mbankcz](https://github.com/SinyaWeo/ofxstatement-mbankcz) by SinyaWeo
+- [ofxstatement-mbankcz](https://github.com/dvdkon/ofxstatement-mbankcz) by dvdkon, who modified the plugin so that extra head/tail lines of CSV file do not have to be deleted.
+
+This version changes the behaviour when `"#Plátce/Příjemce"` is empty:
+- The original plugin sets `"-"` to field OFX.NAME when there's no Payee in the CSV file. However, GnuCash then displays this useless character in the main `Description` field.
+- This modified version of plugin keeps OFX.NAME empty and allows GnuCash to import OFX.MEMO to both `Description` and `Notes` fields.  
 
 ## Usage
-:exclamation: Remove any non-data lines from CSV file so only column headers and data lines are present.
+:exclamation: This version accepts the CSV file as is - no need to manually delete redundant lines.
 ```shell
 $ ofxstatement convert -t mbankcz movements.csv mbank.ofx
 ```
@@ -24,6 +32,4 @@ account = mKonto
 ```
 
 ## Issues
-I've created this to conform mainly to my needs, so it is possible that I haven't
-covered all possible transaction types, etc. If you have an improvement, feel free
-to open an issue or a pull request.
+If you have an improvement, feel free to open an issue or a pull request.
