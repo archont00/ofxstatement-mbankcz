@@ -111,6 +111,13 @@ class MBankParser(CsvStatementParser):
 
         statement_line.id = statement.generate_transaction_id(statement_line)
 
+        # .payee becomes OFX.NAME which becomes "Description" in GnuCash
+        # .memo  becomes OFX.MEMO which becomes "Notes"       in GnuCash
+        # When .payee is empty, GnuCash imports .memo to "Description" and keeps "Notes" empty
+
+        # The original author wanted to have "-" in OFX.NAME, which is unusable in GnuCash
+        # For now, let's keep the code, but explicitely change "-" to "".
+        
         # If payee is empty or transactions is percentual saving set payee to -
         if line[columns["#Plátce/Příjemce"]] =="" or line[columns["#Plátce/Příjemce"]
         ].startswith("PLATBA KARTOU Z ČÁSTKY") or line[columns["#Plátce/Příjemce"]
