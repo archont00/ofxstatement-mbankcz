@@ -1,5 +1,5 @@
 # ofxstatement-mbankcz
-This is a parser for CSV transaction history exported from mBank S.A. (Czech Republic) from within the report in Account History (CSV).
+This is a parser for CSV transaction history exported from mBank S.A. (Czech Republic) from menu Finance // Statements (CSV).
 
 The expected field separator is semicolon (";") and character encoding Win-1250.
 
